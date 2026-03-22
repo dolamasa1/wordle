@@ -1,0 +1,1173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Futuristic Wordle</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 50%, #0f0f0f 100%);
+            height: 100vh;
+            color: #ffffff;
+            overflow: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 30%, rgba(0, 255, 150, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 70%, rgba(0, 255, 150, 0.05) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 15px;
+            position: relative;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 15px;
+            position: relative;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .md-system {
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            color: #ffffff;
+            animation: neonGlow 2s ease-in-out infinite alternate;
+            background: linear-gradient(45deg, #00ff88, #00e676);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 
+                0 0 10px rgba(0, 255, 136, 0.8),
+                0 0 20px rgba(0, 255, 136, 0.6);
+            position: absolute;
+            left: 0;
+        }
+
+        .title-section {
+            flex: 1;
+            text-align: center;
+        }
+
+        .level-indicator {
+            position: absolute;
+            right: 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .level-badge {
+            background: rgba(0, 255, 150, 0.2);
+            border: 1px solid rgba(0, 255, 150, 0.4);
+            border-radius: 12px;
+            padding: 4px 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: #00ff96;
+            text-transform: uppercase;
+        }
+
+        .settings-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(0, 255, 150, 0.3);
+            border-radius: 8px;
+            color: white;
+            padding: 6px 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.8rem;
+        }
+
+        .settings-btn:hover {
+            background: rgba(0, 255, 150, 0.2);
+            box-shadow: 0 0 10px rgba(0, 255, 150, 0.3);
+        }
+
+        @keyframes neonGlow {
+            from {
+                text-shadow: 
+                    0 0 10px rgba(0, 255, 136, 0.8),
+                    0 0 20px rgba(0, 255, 136, 0.6);
+            }
+            to {
+                text-shadow: 
+                    0 0 20px rgba(0, 255, 136, 1),
+                    0 0 30px rgba(0, 255, 136, 0.8);
+            }
+        }
+
+        .title {
+            font-size: 2.3rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #00ff96, #00cc77);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 0 30px rgba(0, 255, 150, 0.3);
+            margin-bottom: 3px;
+        }
+
+        .subtitle {
+            font-size: 0.95rem;
+            color: rgba(255, 255, 255, 0.7);
+            font-weight: 300;
+        }
+
+        /* Dashboard Styles */
+        .dashboard-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(10, 10, 10, 0.85);
+            backdrop-filter: blur(20px);
+            z-index: 2000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .dashboard-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .dashboard {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.9);
+            background: rgba(0, 255, 150, 0.08);
+            backdrop-filter: blur(30px);
+            border: 1px solid rgba(0, 255, 150, 0.25);
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 400px;
+            width: 90%;
+            transition: all 0.3s ease;
+        }
+
+        .dashboard-overlay.show .dashboard {
+            transform: translate(-50%, -50%) scale(1);
+        }
+
+        .dashboard-title {
+            text-align: center;
+            font-size: 1.4rem;
+            font-weight: 600;
+            color: #00ff96;
+            margin-bottom: 25px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .level-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .level-option {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(0, 255, 150, 0.3);
+            border-radius: 12px;
+            padding: 15px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .level-option:hover {
+            background: rgba(0, 255, 150, 0.15);
+            box-shadow: 0 0 20px rgba(0, 255, 150, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .level-option.active {
+            background: rgba(0, 255, 150, 0.2);
+            border-color: #00ff96;
+            box-shadow: 0 0 15px rgba(0, 255, 150, 0.4);
+        }
+
+        .level-name {
+            font-weight: 600;
+            font-size: 1.1rem;
+            color: #ffffff;
+            margin-bottom: 4px;
+        }
+
+        .level-desc {
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.7);
+            font-weight: 300;
+        }
+
+        .dashboard-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+        }
+
+        .dashboard-btn {
+            padding: 10px 20px;
+            border-radius: 12px;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 0.9rem;
+            border: none;
+        }
+
+        .dashboard-btn.primary {
+            background: linear-gradient(135deg, #00ff96, #00cc77);
+            color: #000;
+        }
+
+        .dashboard-btn.primary:hover {
+            box-shadow: 0 0 20px rgba(0, 255, 150, 0.5);
+            transform: translateY(-2px);
+        }
+
+        .dashboard-btn.secondary {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+        }
+
+        .dashboard-btn.secondary:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .game-board {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(0, 255, 150, 0.2);
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 
+                0 20px 40px rgba(0, 0, 0, 0.5),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            min-height: 0;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-rows: repeat(6, 1fr);
+            gap: 6px;
+            margin-bottom: 20px;
+            flex-shrink: 0;
+        }
+
+        .row {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 4px 0px;
+        }
+
+        .cell {
+            width: 54px;
+            height: 54px;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            background: rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cell.correct {
+            background: linear-gradient(135deg, #00ff96, #00cc77);
+            border-color: #00ff96;
+            box-shadow: 0 0 20px rgba(0, 255, 150, 0.5);
+            color: #000;
+        }
+
+        .cell.present {
+            background: linear-gradient(135deg, #ffaa00, #ff8800);
+            border-color: #ffaa00;
+            box-shadow: 0 0 20px rgba(255, 170, 0, 0.5);
+            color: #000;
+        }
+
+        .cell.absent {
+            background: rgba(60, 60, 60, 0.8);
+            border-color: rgba(100, 100, 100, 0.5);
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .cell.flip {
+            animation: flip 0.6s ease-in-out forwards;
+        }
+
+        @keyframes flip {
+            0% { transform: rotateY(0); }
+            50% { transform: rotateY(-90deg); }
+            100% { transform: rotateY(0); }
+        }
+
+        .keyboard {
+            display: grid;
+            grid-template-rows: repeat(3, 1fr);
+            gap: 6px;
+            max-width: 500px;
+            margin: 0 auto;
+            flex-shrink: 0;
+        }
+
+        .keyboard-row {
+            display: flex;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        .key {
+            padding: 10px 14px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(0, 255, 150, 0.3);
+            border-radius: 8px;
+            color: white;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-transform: uppercase;
+            min-width: 35px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.85rem;
+        }
+
+        .key:hover {
+            background: rgba(0, 255, 150, 0.2);
+            box-shadow: 0 0 15px rgba(0, 255, 150, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .key.wide {
+            padding: 10px 18px;
+            min-width: 70px;
+        }
+
+        .key.correct {
+            background: linear-gradient(135deg, #00ff96, #00cc77) !important;
+            color: #000 !important;
+            border-color: #00ff96 !important;
+            box-shadow: 0 0 15px rgba(0, 255, 150, 0.6) !important;
+        }
+
+        .key.present {
+            background: linear-gradient(135deg, #ffaa00, #ff8800) !important;
+            color: #000 !important;
+            border-color: #ffaa00 !important;
+            box-shadow: 0 0 15px rgba(255, 170, 0, 0.6) !important;
+        }
+
+        .key.absent {
+            background: rgba(40, 40, 40, 0.9) !important;
+            border-color: rgba(60, 60, 60, 0.8) !important;
+            color: rgba(255, 255, 255, 0.5) !important;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.5) !important;
+            cursor: default;
+        }
+
+        .key.absent:hover {
+            background: rgba(40, 40, 40, 0.9) !important;
+            transform: none;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.5) !important;
+        }
+
+        .message {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 255, 150, 0.15);
+            backdrop-filter: blur(20px);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 10px;
+            border: 1px solid rgba(0, 255, 150, 0.5);
+            z-index: 1000;
+            opacity: 0;
+            transition: all 0.3s;
+            font-weight: 500;
+        }
+
+        .message.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(10px);
+        }
+
+        .word-info-panel {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(10, 10, 10, 0.85);
+            backdrop-filter: blur(20px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s;
+        }
+
+        .word-info-panel.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .word-info-content {
+            background: rgba(0, 255, 150, 0.08);
+            backdrop-filter: blur(30px);
+            border: 1px solid rgba(0, 255, 150, 0.3);
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 500px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        }
+
+        .word-display {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #00ff96;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+        }
+
+        .word-arabic {
+            font-size: 1.8rem;
+            color: #ffaa00;
+            margin-bottom: 20px;
+            font-weight: 500;
+        }
+
+        .definition {
+            margin-bottom: 15px;
+        }
+
+        .definition-label {
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+
+        .definition-text {
+            font-size: 1rem;
+            line-height: 1.6;
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .close-btn {
+            background: linear-gradient(135deg, #00ff96, #00cc77);
+            color: #000;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 30px;
+            transition: all 0.3s;
+        }
+
+        .close-btn:hover {
+            box-shadow: 0 0 20px rgba(0, 255, 150, 0.5);
+            transform: translateY(-2px);
+        }
+
+        .game-stats {
+            text-align: center;
+            margin-bottom: 12px;
+            flex-shrink: 0;
+        }
+
+        .attempts {
+            font-size: 0.95rem;
+            color: rgba(255, 255, 255, 0.8);
+            margin-bottom: 6px;
+        }
+
+        .new-game-btn {
+            background: linear-gradient(135deg, #00ff96, #00cc77);
+            color: #000;
+            border: none;
+            padding: 8px 18px;
+            border-radius: 25px;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 600;
+            cursor: pointer;
+            margin: 6px;
+            transition: all 0.3s;
+            font-size: 0.85rem;
+        }
+
+        .new-game-btn:hover {
+            box-shadow: 0 0 20px rgba(0, 255, 150, 0.5);
+            transform: translateY(-2px);
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 600px) {
+            .container {
+                padding: 10px;
+            }
+
+            .header {
+                flex-direction: column;
+                gap: 8px;
+                align-items: center;
+            }
+
+            .md-system {
+                position: static;
+                font-size: 0.7rem;
+            }
+
+            .level-indicator {
+                position: static;
+            }
+
+            .title-section {
+                order: 2;
+            }
+
+            .level-indicator {
+                order: 3;
+            }
+
+            .md-system {
+                order: 1;
+            }
+
+            .title {
+                font-size: 1.8rem;
+            }
+
+            .subtitle {
+                font-size: 0.85rem;
+            }
+
+            .cell {
+                width: 47px;
+                height: 47px;
+                font-size: 1.2rem;
+            }
+
+            .game-board {
+                padding: 15px;
+            }
+
+            .key {
+                padding: 8px 10px;
+                font-size: 0.8rem;
+                min-width: 30px;
+            }
+
+            .key.wide {
+                min-width: 60px;
+            }
+
+            .level-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .dashboard {
+                padding: 25px 20px;
+            }
+
+            .dashboard-title {
+                font-size: 1.2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="md-system">MD System</div>
+            <div class="title-section">
+                <h1 class="title">WORDLE</h1>
+                <p class="subtitle">Futuristic Word Challenge</p>
+            </div>
+            <div class="level-indicator">
+                <div class="level-badge" id="current-level">A1-A2</div>
+                <button class="settings-btn" onclick="showDashboard()">⚙</button>
+            </div>
+        </div>
+
+        <div class="game-board">
+            <div class="game-stats">
+                <div class="attempts">Attempt: <span id="current-attempt">1</span> / 6</div>
+                <button class="new-game-btn" onclick="startNewGame()">New Game</button>
+            </div>
+
+            <div class="grid" id="grid">
+                <!-- Grid will be generated by JavaScript -->
+            </div>
+
+            <div class="keyboard" id="keyboard">
+                <div class="keyboard-row">
+                    <button class="key" onclick="handleKey('q')">Q</button>
+                    <button class="key" onclick="handleKey('w')">W</button>
+                    <button class="key" onclick="handleKey('e')">E</button>
+                    <button class="key" onclick="handleKey('r')">R</button>
+                    <button class="key" onclick="handleKey('t')">T</button>
+                    <button class="key" onclick="handleKey('y')">Y</button>
+                    <button class="key" onclick="handleKey('u')">U</button>
+                    <button class="key" onclick="handleKey('i')">I</button>
+                    <button class="key" onclick="handleKey('o')">O</button>
+                    <button class="key" onclick="handleKey('p')">P</button>
+                </div>
+                <div class="keyboard-row">
+                    <button class="key" onclick="handleKey('a')">A</button>
+                    <button class="key" onclick="handleKey('s')">S</button>
+                    <button class="key" onclick="handleKey('d')">D</button>
+                    <button class="key" onclick="handleKey('f')">F</button>
+                    <button class="key" onclick="handleKey('g')">G</button>
+                    <button class="key" onclick="handleKey('h')">H</button>
+                    <button class="key" onclick="handleKey('j')">J</button>
+                    <button class="key" onclick="handleKey('k')">K</button>
+                    <button class="key" onclick="handleKey('l')">L</button>
+                </div>
+                <div class="keyboard-row">
+                    <button class="key wide" onclick="handleEnter()">ENTER</button>
+                    <button class="key" onclick="handleKey('z')">Z</button>
+                    <button class="key" onclick="handleKey('x')">X</button>
+                    <button class="key" onclick="handleKey('c')">C</button>
+                    <button class="key" onclick="handleKey('v')">V</button>
+                    <button class="key" onclick="handleKey('b')">B</button>
+                    <button class="key" onclick="handleKey('n')">N</button>
+                    <button class="key" onclick="handleKey('m')">M</button>
+                    <button class="key wide" onclick="handleBackspace()">⌫</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Dashboard -->
+    <div class="dashboard-overlay" id="dashboard-overlay">
+        <div class="dashboard">
+            <h2 class="dashboard-title">Select Level</h2>
+            <div class="level-grid">
+                <div class="level-option active" onclick="selectLevel('A1-A2')" id="level-a">
+                    <div class="level-name">A1-A2</div>
+                    <div class="level-desc">Basic</div>
+                </div>
+                <div class="level-option" onclick="selectLevel('B1-B2')" id="level-b">
+                    <div class="level-name">B1-B2</div>
+                    <div class="level-desc">Intermediate</div>
+                </div>
+                <div class="level-option" onclick="selectLevel('C1-C2')" id="level-c">
+                    <div class="level-name">C1-C2</div>
+                    <div class="level-desc">Advanced</div>
+                </div>
+                <div class="level-option" onclick="selectLevel('Random')" id="level-random">
+                    <div class="level-name">Random</div>
+                    <div class="level-desc">Any Level</div>
+                </div>
+            </div>
+            <div class="dashboard-actions">
+                <button class="dashboard-btn primary" onclick="applyLevelChange()">Apply</button>
+                <button class="dashboard-btn secondary" onclick="closeDashboard()">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="message" id="message"></div>
+
+    <div class="word-info-panel" id="word-info-panel">
+        <div class="word-info-content">
+            <div class="word-display" id="word-display"></div>
+            <div class="word-arabic" id="word-arabic"></div>
+            <div class="definition">
+                <div class="definition-label">English Definition:</div>
+                <div class="definition-text" id="definition-en"></div>
+            </div>
+            <div class="definition">
+                <div class="definition-label">Arabic Definition:</div>
+                <div class="definition-text" id="definition-ar"></div>
+            </div>
+            <button class="close-btn" onclick="closeWordInfo()">Continue</button>
+        </div>
+    </div>
+
+    <script>
+        // Sample word data based on your JSON structure
+        const WORDS_DATA = {
+            "rossa": {
+                "en": "",
+                "ar_def": "",
+                "ar_word": "روسا",
+                "level": "A1-A2"
+            },
+            "wizzo": {
+                "en": "",
+                "ar_def": "",
+                "ar_word": "ويزو",
+                "level": "A1-A2"
+            },
+            "gurks": {
+                "en": "",
+                "ar_def": "",
+                "ar_word": "جوركس",
+                "level": "B1-B2"
+            },
+            "beisa": {
+                "en": "",
+                "ar_def": "",
+                "ar_word": "علية",
+                "level": "B1-B2"
+            },
+            "poche": {
+                "en": "",
+                "ar_def": "",
+                "ar_word": "عدد قليل",
+                "level": "A1-A2"
+            },
+            "hares": {
+                "en": "swift timid long-eared mammal larger than a rabbit having a divided upper lip and long hind legs; young born furred and with open eyes",
+                "ar_def": "ثدييات سريعة الخجولة ذات الأذن الطويلة أكبر من الأرنب الذي يحتوي على شفة علوية مقسمة وأرجل خلفية طويلة ؛ ولدت الشابة مع عيون مفتوحة",
+                "ar_word": "الأرانب",
+                "level": "B1-B2"
+            },
+            "triad": {
+                "en": "the cardinal number that is the sum of one and one and one",
+                "ar_def": "الرقم الكاردينال الذي هو مجموع واحد وواحد واحد",
+                "ar_word": "الثالوث",
+                "level": "C1-C2"
+            },
+            "kelpy": {
+                "en": "(Scottish folklore) water spirit in the form of a horse that likes to drown its riders",
+                "ar_def": "(الفولكلور الاسكتلندي) روح الماء في شكل حصان يحب أن يغرق راكبيه",
+                "ar_word": "كيلبي",
+                "level": "C1-C2"
+            },
+            "swami": {
+                "en": "a Hindu religious teacher; used as a title of respect",
+                "ar_def": "مدرس ديني هندوسي تستخدم كعنوان الاحترام",
+                "ar_word": "سوامي",
+                "level": "C1-C2"
+            },
+            "femal": {
+                "en": "",
+                "ar_def": "",
+                "ar_word": "أنثى",
+                "level": "A1-A2"
+            },
+            "mocap": {
+                "en": "Motion capture.",
+                "ar_def": "التقاط الحركة.",
+                "ar_word": "mocap",
+                "level": "B1-B2"
+            },
+            "decal": {
+                "en": "either a design that is fixed to some surface or a paper bearing the design which is to be transferred to the surface",
+                "ar_def": "إما تصميم ثابت لبعض السطح أو ورقة تحمل التصميم الذي سيتم نقله إلى السطح",
+                "ar_word": "صائق",
+                "level": "B1-B2"
+            },
+            "dunny": {
+                "en": "Somewhat dun, dusky brownish.",
+                "ar_def": "إلى حد ما دون ، دوسكي براونش.",
+                "ar_word": "dunny",
+                "level": "A1-A2"
+            },
+            "fungs": {
+                "en": "",
+                "ar_def": "",
+                "ar_word": "الفطريات",
+                "level": "B1-B2"
+            },
+            "waacs": {
+                "en": "",
+                "ar_def": "",
+                "ar_word": "واك",
+                "level": "A1-A2"
+            },
+            "cadgy": {
+                "en": "",
+                "ar_def": "",
+                "ar_word": "Cadgy",
+                "level": "B1-B2"
+            },
+            "jalap": {
+                "en": "A cathartic drug consisting of the tuberous roots of Ipomoea purga, a convolvulaceous plant found in Mexico.",
+                "ar_def": "دواء شافس يتكون من جذور درنية من Ipomoea Purga ، وهو نبات مجنسي موجود في المكسيك.",
+                "ar_word": "الكرة الأرضية",
+                "level": "C1-C2"
+            }
+        };
+
+        // Game state
+        let currentWord = '';
+        let currentAttempt = 0;
+        let currentGuess = '';
+        let gameOver = false;
+        let grid = [];
+        let keyboardStates = {}; // Track keyboard letter states
+        let selectedLevel = 'A1-A2';
+        let tempSelectedLevel = 'A1-A2';
+
+        // Get words with definitions for the selected level
+        function getWordsWithDefinitions(level = 'Random') {
+            let words = Object.keys(WORDS_DATA).filter(word => 
+                WORDS_DATA[word].en && WORDS_DATA[word].en.trim() !== ''
+            );
+
+            if (level !== 'Random') {
+                words = words.filter(word => WORDS_DATA[word].level === level);
+            }
+
+            return words.length > 0 ? words : Object.keys(WORDS_DATA).filter(word => 
+                WORDS_DATA[word].en && WORDS_DATA[word].en.trim() !== ''
+            );
+        }
+
+        // Dashboard functions
+        function showDashboard() {
+            tempSelectedLevel = selectedLevel;
+            updateLevelSelection();
+            document.getElementById('dashboard-overlay').classList.add('show');
+        }
+
+        function closeDashboard() {
+            document.getElementById('dashboard-overlay').classList.remove('show');
+        }
+
+        function selectLevel(level) {
+            tempSelectedLevel = level;
+            updateLevelSelection();
+        }
+
+        function updateLevelSelection() {
+            // Remove active class from all options
+            document.querySelectorAll('.level-option').forEach(option => {
+                option.classList.remove('active');
+            });
+
+            // Add active class to selected option
+            const levelMap = {
+                'A1-A2': 'level-a',
+                'B1-B2': 'level-b',
+                'C1-C2': 'level-c',
+                'Random': 'level-random'
+            };
+
+            const activeElement = document.getElementById(levelMap[tempSelectedLevel]);
+            if (activeElement) {
+                activeElement.classList.add('active');
+            }
+        }
+
+        function applyLevelChange() {
+            selectedLevel = tempSelectedLevel;
+            document.getElementById('current-level').textContent = selectedLevel;
+            closeDashboard();
+            startNewGame();
+        }
+
+        // Initialize game
+        function initGame() {
+            createGrid();
+            startNewGame();
+            setupKeyboardListener();
+        }
+
+        function createGrid() {
+            const gridElement = document.getElementById('grid');
+            gridElement.innerHTML = '';
+            grid = [];
+
+            for (let i = 0; i < 6; i++) {
+                const row = document.createElement('div');
+                row.className = 'row';
+                const rowData = [];
+
+                for (let j = 0; j < 5; j++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'cell';
+                    cell.id = `cell-${i}-${j}`;
+                    row.appendChild(cell);
+                    rowData.push({element: cell, letter: '', state: ''});
+                }
+
+                gridElement.appendChild(row);
+                grid.push(rowData);
+            }
+        }
+
+        function startNewGame() {
+            const wordsWithDef = getWordsWithDefinitions(selectedLevel);
+            if (wordsWithDef.length === 0) {
+                showMessage('No words available for this level');
+                return;
+            }
+            
+            currentWord = wordsWithDef[Math.floor(Math.random() * wordsWithDef.length)].toLowerCase();
+            currentAttempt = 0;
+            currentGuess = '';
+            gameOver = false;
+            keyboardStates = {}; // Reset keyboard states
+
+            // Reset grid
+            grid.forEach(row => {
+                row.forEach(cell => {
+                    cell.element.textContent = '';
+                    cell.element.className = 'cell';
+                    cell.letter = '';
+                    cell.state = '';
+                });
+            });
+
+            // Reset keyboard
+            const keys = document.querySelectorAll('.key');
+            keys.forEach(key => {
+                if (!key.classList.contains('wide')) {
+                    key.className = 'key';
+                } else {
+                    key.className = 'key wide';
+                }
+            });
+
+            updateAttemptDisplay();
+            console.log('New word:', currentWord, 'Level:', selectedLevel); // For debugging
+        }
+
+        function updateAttemptDisplay() {
+            document.getElementById('current-attempt').textContent = currentAttempt + 1;
+        }
+
+        function handleKey(letter) {
+            if (gameOver) return;
+            if (currentGuess.length < 5) {
+                currentGuess += letter.toLowerCase();
+                updateCurrentRow();
+            }
+        }
+
+        function handleBackspace() {
+            if (gameOver) return;
+            if (currentGuess.length > 0) {
+                currentGuess = currentGuess.slice(0, -1);
+                updateCurrentRow();
+            }
+        }
+
+        function handleEnter() {
+            if (gameOver) return;
+            if (currentGuess.length !== 5) {
+                showMessage('Word must be 5 letters long');
+                return;
+            }
+
+            // Check if the word exists in our dataset
+            if (!WORDS_DATA.hasOwnProperty(currentGuess.toLowerCase())) {
+                showMessage('Word not in word list');
+                return;
+            }
+
+            checkGuess();
+        }
+
+        function updateCurrentRow() {
+            const currentRow = grid[currentAttempt];
+            for (let i = 0; i < 5; i++) {
+                currentRow[i].element.textContent = i < currentGuess.length ? currentGuess[i].toUpperCase() : '';
+                currentRow[i].letter = i < currentGuess.length ? currentGuess[i] : '';
+            }
+        }
+
+        function checkGuess() {
+            const currentRow = grid[currentAttempt];
+            const letterCount = {};
+            
+            // Count letters in the target word
+            for (let letter of currentWord) {
+                letterCount[letter] = (letterCount[letter] || 0) + 1;
+            }
+
+            const results = [];
+
+            // First pass: mark correct positions
+            for (let i = 0; i < 5; i++) {
+                if (currentGuess[i] === currentWord[i]) {
+                    results[i] = 'correct';
+                    letterCount[currentGuess[i]]--;
+                } else {
+                    results[i] = null;
+                }
+            }
+
+            // Second pass: mark present letters
+            for (let i = 0; i < 5; i++) {
+                if (results[i] === null) {
+                    if (letterCount[currentGuess[i]] > 0) {
+                        results[i] = 'present';
+                        letterCount[currentGuess[i]]--;
+                    } else {
+                        results[i] = 'absent';
+                    }
+                }
+            }
+
+            // Apply results with animation
+            currentRow.forEach((cell, i) => {
+                setTimeout(() => {
+                    cell.element.classList.add('flip');
+                    setTimeout(() => {
+                        cell.element.classList.add(results[i]);
+                        cell.state = results[i];
+                        updateKeyboard(currentGuess[i], results[i]);
+                    }, 300);
+                }, i * 100);
+            });
+
+            // Check win/lose condition
+            setTimeout(() => {
+                if (currentGuess === currentWord) {
+                    gameOver = true;
+                    showMessage('Congratulations! You won! 🎉');
+                    setTimeout(() => showWordInfo(), 2000);
+                } else {
+                    currentAttempt++;
+                    if (currentAttempt >= 6) {
+                        gameOver = true;
+                        showMessage('Game Over! Better luck next time!');
+                        setTimeout(() => showWordInfo(), 2000);
+                    } else {
+                        updateAttemptDisplay();
+                    }
+                }
+                currentGuess = '';
+            }, 500);
+        }
+
+        function updateKeyboard(letter, state) {
+            const key = Array.from(document.querySelectorAll('.key')).find(k => 
+                k.textContent.toLowerCase() === letter
+            );
+            
+            if (key) {
+                const currentState = keyboardStates[letter] || '';
+                
+                // Upgrade logic: absent < present < correct
+                if (state === 'correct') {
+                    // Always upgrade to correct
+                    keyboardStates[letter] = 'correct';
+                    key.className = key.className.includes('wide') ? 'key wide correct' : 'key correct';
+                } else if (state === 'present' && currentState !== 'correct') {
+                    // Upgrade to present only if not already correct
+                    keyboardStates[letter] = 'present';
+                    key.className = key.className.includes('wide') ? 'key wide present' : 'key present';
+                } else if (state === 'absent' && !currentState) {
+                    // Only set absent if no previous state
+                    keyboardStates[letter] = 'absent';
+                    key.className = key.className.includes('wide') ? 'key wide absent' : 'key absent';
+                }
+            }
+        }
+
+        function showMessage(text) {
+            const messageEl = document.getElementById('message');
+            messageEl.textContent = text;
+            messageEl.classList.add('show');
+            setTimeout(() => messageEl.classList.remove('show'), 3000);
+        }
+
+        function showWordInfo() {
+            const wordData = WORDS_DATA[currentWord];
+            document.getElementById('word-display').textContent = currentWord.toUpperCase();
+            document.getElementById('word-arabic').textContent = wordData.ar_word;
+            document.getElementById('definition-en').textContent = wordData.en;
+            document.getElementById('definition-ar').textContent = wordData.ar_def;
+            document.getElementById('word-info-panel').classList.add('show');
+        }
+
+        function closeWordInfo() {
+            document.getElementById('word-info-panel').classList.remove('show');
+        }
+
+        function setupKeyboardListener() {
+            document.addEventListener('keydown', (e) => {
+                if (gameOver) return;
+
+                if (e.key >= 'a' && e.key <= 'z') {
+                    handleKey(e.key);
+                } else if (e.key === 'Backspace') {
+                    handleBackspace();
+                } else if (e.key === 'Enter') {
+                    handleEnter();
+                } else if (e.key === 'Escape') {
+                    closeDashboard();
+                    closeWordInfo();
+                }
+            });
+
+            // Close dashboard when clicking outside
+            document.getElementById('dashboard-overlay').addEventListener('click', (e) => {
+                if (e.target.id === 'dashboard-overlay') {
+                    closeDashboard();
+                }
+            });
+        }
+
+        // Initialize the game when the page loads
+        window.addEventListener('load', initGame);
+    </script>
+</body>
+</html>
