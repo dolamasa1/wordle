@@ -1,15 +1,20 @@
-// Game state
-let WORDS_DATA;
-let currentWord = '';
-let currentAttempt = 0;
-let currentGuess = '';
+/**
+ * Wordle Game State
+ */
+let WORDS_DATA;      // Full dictionary from words.json
+let currentWord = ''; // The target word to guess
+let currentAttempt = 0; // Current row (0-5)
+let currentGuess = ''; // Letters entered in current row
 let gameOver = false;
-let grid = [];
-let keyboardStates = {}; // Track keyboard letter states
+let grid = [];       // Grid state management
+let keyboardStates = {}; // Track letter status (correct, present, absent)
 let selectedLevel = 'A1-A2';
 let tempSelectedLevel = 'A1-A2';
-let guessHistory = []; // Store all guesses with their words
+let guessHistory = []; 
 
+/**
+ * Mapping CEFR levels to internal dictionary tiers
+ */
 const levelToTier = {
     'A1-A2': 1,
     'A2-B1': 1.5,

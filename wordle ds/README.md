@@ -7,6 +7,7 @@ This directory contains the tools used to curate and generate the `words.json` d
 - **`create_dictionary.py`**: Python script to process raw word lists into structured JSON.
 - **`words.txt`**: Raw source list of words and their metadata.
 - **`mini_dictionary.json`**: A smaller sample dictionary for testing.
+- **`generation_1-5/`**: Evolutionary folders containing different versions of the curated word datasets.
 
 ## ⚙️ How it Works
 
