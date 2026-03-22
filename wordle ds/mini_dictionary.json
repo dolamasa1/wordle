@@ -1,0 +1,22 @@
+{
+  "apple": {
+    "en": "A round fruit with red or green skin and a whitish inside.",
+    "ar": "تفاحة: فاكهة دائرية ذات قشرة حمراء أو خضراء ولب أبيض."
+  },
+  "book": {
+    "en": "A set of written or printed pages, bound together.",
+    "ar": "كتاب: مجموعة من الصفحات المكتوبة أو المطبوعة ومجلدة."
+  },
+  "brave": {
+    "en": "Ready to face and endure danger or pain; showing courage.",
+    "ar": "شجاع: مستعد لمواجهة الخطر أو الألم؛ يُظهر شجاعة."
+  },
+  "river": {
+    "en": "A large, natural stream of flowing water.",
+    "ar": "نهر: مجرى مائي طبيعي وكبير يتدفق فيه الماء."
+  },
+  "light": {
+    "en": "Something that makes things visible or bright.",
+    "ar": "ضوء: ما يجعل الأشياء مرئية أو مضيئة."
+  }
+}
